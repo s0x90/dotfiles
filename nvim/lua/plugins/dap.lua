@@ -50,6 +50,8 @@ return {
     ft = "go",
     dependencies = { "mfussenegger/nvim-dap" },
     config = function()
+      local dap = require("dap")
+
       require("dap-go").setup({
         delve = {
           path = vim.fn.exepath("dlv"),
@@ -61,12 +63,24 @@ return {
             request = "launch",
             mode = "test",
             program = "${fileDirname}",
+            --cwd = "${fileDirname}",
             cwd = require("lspconfig.util").root_pattern("go.mod")(vim.fn.getcwd()),
+            args = {"-test.run", vim.fn.expand("<cword>")}, -- automatically picks test under cursor
           },
         },
       })
+      --[[dap.configurations.go = {
+        {
+          type = "go",
+          name = "Debug current test",
+          request = "launch",
+          mode = "test",
+          program = "${fileDirname}",  -- directory of the current file
+          cwd = lsp_util.root_pattern("go.mod")(vim.fn.getcwd()), -- project root
+          args = {"-test.run", vim.fn.expand("<cword>")}, -- test function under cursor
+        },
+      }]]
 
-      local dap = require("dap")
       local map = vim.keymap.set
       map("n", "<F5>", function() require("dap-go").debug_test() end, { desc = "Debug Test" })
       map("n", "<F9>", function() dap.toggle_breakpoint() end, { desc = "Toggle Breakpoint" })
