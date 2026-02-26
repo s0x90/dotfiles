@@ -1,12 +1,13 @@
 return {
   "nickjvandyke/opencode.nvim",
   version = "*", -- Latest stable release
+  lazy = false,
   dependencies = {
     {
       -- `snacks.nvim` integration is recommended, but optional
       ---@module "snacks" <- Loads `snacks.nvim` types for configuration intellisense
       "folke/snacks.nvim",
-      optional = true,
+      optional = false,
       opts = {
         input = {}, -- Enhances `ask()`
         picker = { -- Enhances `select()`
