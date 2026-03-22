@@ -34,7 +34,7 @@ return {
         vim.lsp.buf.definition()
       end, vim.tbl_deep_extend("force", opts, { desc = "LSP Goto Definition" }))
       map("n", "K", function()
-        vim.lsp.buf.hover()
+        vim.lsp.buf.hover { border = "rounded" }
       end, vim.tbl_deep_extend("force", opts, { desc = "LSP Hover" }))
       map("n", "<leader>vws", function()
         vim.lsp.buf.workspace_symbol()
@@ -58,7 +58,7 @@ return {
         vim.lsp.buf.rename()
       end, vim.tbl_deep_extend("force", opts, { desc = "LSP Rename" }))
       map("i", "<C-h>", function()
-        vim.lsp.buf.signature_help()
+        vim.lsp.buf.signature_help { border = "rounded" }
       end, vim.tbl_deep_extend("force", opts, { desc = "LSP Signature Help" }))
     end)
 
@@ -160,6 +160,10 @@ return {
         expand = function(args)
           require("luasnip").lsp_expand(args.body)
         end,
+      },
+      window = {
+        completion = cmp.config.window.bordered(),
+        documentation = cmp.config.window.bordered(),
       },
       sources = {
         { name = "nvim_lsp" },
