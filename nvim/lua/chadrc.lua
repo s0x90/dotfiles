@@ -40,9 +40,9 @@ M.ui = {
                 local ft_icon = devicons.get_icon(node.name)
                 icon = ft_icon or icon
               elseif node.type == "directory" then
-                icon = node.open and "" or ""
+                icon = node.open and "󰷏" or "󰉋"
               end
-              return "%#St_file# " .. icon .. " " .. node.name .. " %#St_file_sep#" .. ""
+              return "%#St_file# " .. icon .. " " .. node.name .. " %#St_file_sep#"
             end
           end
           return ""
@@ -51,7 +51,7 @@ M.ui = {
         local utils = require "nvchad.stl.utils"
         local x = utils.file()
         local name = " " .. x[2] .. " "
-        return "%#St_file# " .. x[1] .. name .. "%#St_file_sep#" .. ""
+        return "%#St_file# " .. x[1] .. name .. "%#St_file_sep#"
       end,
     },
   },
