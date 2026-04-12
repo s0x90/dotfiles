@@ -22,9 +22,39 @@ M.base46 = {
 }
 
 -- M.nvdash = { load_on_startup = true }
--- M.ui = {
---       tabufline = {
---          lazyload = false
---      }
--- }
+
+M.ui = {
+  statusline = {
+    modules = {
+      file = function()
+        local stbufnr = vim.api.nvim_win_get_buf(vim.g.statusline_winid or 0)
+
+        if vim.bo[stbufnr].filetype == "NvimTree" then
+          local ok, api = pcall(require, "nvim-tree.api")
+          if ok then
+            local node = api.tree.get_node_under_cursor()
+            if node and node.name then
+              local icon = "󰈚"
+              local devicons_ok, devicons = pcall(require, "nvim-web-devicons")
+              if devicons_ok and node.type == "file" then
+                local ft_icon = devicons.get_icon(node.name)
+                icon = ft_icon or icon
+              elseif node.type == "directory" then
+                icon = node.open and "" or ""
+              end
+              return "%#St_file# " .. icon .. " " .. node.name .. " %#St_file_sep#" .. ""
+            end
+          end
+          return ""
+        end
+
+        local utils = require "nvchad.stl.utils"
+        local x = utils.file()
+        local name = " " .. x[2] .. " "
+        return "%#St_file# " .. x[1] .. name .. "%#St_file_sep#" .. ""
+      end,
+    },
+  },
+}
+
 return M
