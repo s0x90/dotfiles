@@ -14,6 +14,10 @@ M.base46 = {
     NvimTreeWinSeparator = { fg = "light_grey", bg = "NONE" },
     NvimTreeCursorLine = { bg = "one_bg" },
     WinSeparator = { fg = "light_grey" },
+    TbFill = { bg = "black" },           -- tabline empty space: #212121
+    TbBufOff = { bg = "black" },         -- inactive buffer tabs
+    TbBufOffClose = { bg = "black" },    -- close icon on inactive tabs
+    TbBufOffModified = { bg = "black" }, -- modified icon on inactive tabs
   },
 }
 
