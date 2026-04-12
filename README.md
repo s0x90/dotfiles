@@ -65,7 +65,7 @@ On first Neovim launch, [lazy.nvim](https://github.com/folke/lazy.nvim) will boo
 - **Leader key**: `ALT + q` (tmux-style workflow)
 - **Theme**: MaterialDarker
 - **Font**: JetBrains Mono, size 14
-- **Max FPS**: 240
+- **Max FPS**: 120
 - **Tab management**: `LEADER + c/x/b/n/0-9`
 - **Pane splitting**: `LEADER + \` (horizontal), `LEADER + -` (vertical)
 - **Pane navigation**: `LEADER + h/j/k/l` (vim-style)

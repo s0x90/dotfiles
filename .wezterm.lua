@@ -48,8 +48,8 @@ if wezterm.config_builder then
 end
 
 -- max fps
-config.max_fps = 240
-config.animation_fps = 240
+config.max_fps = 120
+config.animation_fps = 120
 
 --[[
 ============================
