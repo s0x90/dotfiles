@@ -8,10 +8,12 @@ local M = {}
 M.base46 = {
   theme = "material-darker",
 
-  -- hl_override = {
-  -- 	Comment = { italic = true },
-  -- 	["@comment"] = { italic = true },
-  -- },
+  hl_override = {
+    NvimTreeNormal = { bg = "NONE" },
+    NvimTreeNormalNC = { bg = "NONE" },
+    NvimTreeWinSeparator = { bg = "NONE" },
+    NvimTreeCursorLine = { bg = "one_bg" },
+  },
 }
 
 -- M.nvdash = { load_on_startup = true }
