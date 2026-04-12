@@ -41,17 +41,71 @@ Symlink the configuration files to their expected locations:
 ```sh
 ln -sf ~/env-config/.zshrc ~/.zshrc
 ln -sf ~/env-config/.wezterm.lua ~/.wezterm.lua
+```
+
+#### Neovim / NvChad
+
+This config uses [NvChad](https://nvchad.com/) v2.5 as a Neovim framework. If you already have a Neovim config, back it up first:
+
+```sh
+mv ~/.config/nvim ~/.config/nvim.bak
+mv ~/.local/share/nvim ~/.local/share/nvim.bak
+mv ~/.local/state/nvim ~/.local/state/nvim.bak
+mv ~/.cache/nvim ~/.cache/nvim.bak
+```
+
+Then symlink the config from this repo:
+
+```sh
 ln -sf ~/env-config/nvim ~/.config/nvim
 ```
 
-For OpenCode theme:
+On first launch, [lazy.nvim](https://github.com/folke/lazy.nvim) will bootstrap itself, pull NvChad, and install all plugins automatically. No separate NvChad installation is needed -- it is loaded as a lazy.nvim plugin dependency.
+
+```sh
+nvim
+```
+
+Wait for the initial plugin installation to complete, then restart Neovim.
+
+#### OpenCode
+
+[OpenCode](https://opencode.ai/) is an open source AI coding agent for the terminal.
+
+Install via Homebrew:
+
+```sh
+brew install anomalyco/tap/opencode
+```
+
+Or via the install script:
+
+```sh
+curl -fsSL https://opencode.ai/install | bash
+```
+
+Or via npm:
+
+```sh
+npm install -g opencode-ai
+```
+
+See the [OpenCode docs](https://opencode.ai/docs) for other installation methods and provider configuration.
+
+To apply the custom Material Darker theme from this repo:
 
 ```sh
 mkdir -p ~/.config/opencode/themes
 ln -sf ~/env-config/opencode/themes/material-darker.json ~/.config/opencode/themes/material-darker.json
 ```
 
-On first Neovim launch, [lazy.nvim](https://github.com/folke/lazy.nvim) will bootstrap itself and install all plugins automatically.
+Then set the theme in your OpenCode config (`~/.config/opencode/config.json`):
+
+```json
+{
+  "theme": "material-darker"
+}
+```
 
 ## Highlights
 
