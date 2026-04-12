@@ -58,6 +58,10 @@ Custom Configuration
 ]]
 --
 
+-- Use wezterm terminfo (without smglr) to avoid DECSLRM scroll region bug
+-- that causes split-screen corruption in Neovim 0.12+ (wezterm/wezterm#5750)
+config.term = "wezterm"
+
 -- Rounded or Square Style Tabs
 
 -- change to square if you don't like rounded tab style
