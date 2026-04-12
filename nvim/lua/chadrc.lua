@@ -11,8 +11,9 @@ M.base46 = {
   hl_override = {
     NvimTreeNormal = { bg = "NONE" },
     NvimTreeNormalNC = { bg = "NONE" },
-    NvimTreeWinSeparator = { bg = "NONE" },
+    NvimTreeWinSeparator = { fg = "light_grey", bg = "NONE" },
     NvimTreeCursorLine = { bg = "one_bg" },
+    WinSeparator = { fg = "light_grey" },
   },
 }
 
