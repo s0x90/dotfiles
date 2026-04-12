@@ -28,7 +28,7 @@
 --    - LEADER + UpArrow: Increase the pane size upward by 5 units.
 
 -- 5. Status Line:
---    - The status line indicates when the leader key is active, displaying an ocean wave emoji (🌊).
+--    - The status line indicates when the leader key is active, displaying an ocean alien monster emoji (👾).
 
 -- Miscellaneous Configurations:
 -- - Tabs are shown even if there's only one tab.
