@@ -1,4 +1,4 @@
-# env-config
+# dotfiles
 
 Personal development environment configuration (dotfiles) for macOS. Includes shell, terminal emulator, editor, and AI agent configurations.
 
@@ -33,14 +33,14 @@ For Go development, install [Go](https://go.dev/) and [Delve](https://github.com
 Clone the repository:
 
 ```sh
-git clone https://github.com/s0x90/env-config.git ~/env-config
+git clone https://github.com/s0x90/dotfiles.git ~/dotfiles
 ```
 
 Symlink the configuration files to their expected locations:
 
 ```sh
-ln -sf ~/env-config/.zshrc ~/.zshrc
-ln -sf ~/env-config/.wezterm.lua ~/.wezterm.lua
+ln -sf ~/dotfiles/.zshrc ~/.zshrc
+ln -sf ~/dotfiles/.wezterm.lua ~/.wezterm.lua
 ```
 
 #### Neovim / NvChad
@@ -57,7 +57,7 @@ mv ~/.cache/nvim ~/.cache/nvim.bak
 Then symlink the config from this repo:
 
 ```sh
-ln -sf ~/env-config/nvim ~/.config/nvim
+ln -sf ~/dotfiles/nvim ~/.config/nvim
 ```
 
 On first launch, [lazy.nvim](https://github.com/folke/lazy.nvim) will bootstrap itself, pull NvChad, and install all plugins automatically. No separate NvChad installation is needed -- it is loaded as a lazy.nvim plugin dependency.
@@ -96,7 +96,7 @@ To apply the custom Material Darker theme from this repo:
 
 ```sh
 mkdir -p ~/.config/opencode/themes
-ln -sf ~/env-config/opencode/themes/material-darker.json ~/.config/opencode/themes/material-darker.json
+ln -sf ~/dotfiles/opencode/themes/material-darker.json ~/.config/opencode/themes/material-darker.json
 ```
 
 Then set the theme in your OpenCode config (`~/.config/opencode/config.json`):
