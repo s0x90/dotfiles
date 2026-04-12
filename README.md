@@ -3,7 +3,6 @@
 Personal development environment configuration (dotfiles) for macOS. Includes shell, terminal emulator, editor, and AI agent configurations.
 
 ![Neovim + WezTerm](nvim-weztrm.png)
-![Neovim + OpenCode](nvim-opencode.png)
 
 ## Contents
 
