@@ -37,5 +37,13 @@ return {
       return conf
     end,
 
-  }
+  },
+  {
+  "nvim-tree/nvim-tree.lua",
+  opts = {
+    view = {
+      width = 30,  -- decrease to whatever you want
+    },
+  },
+},
 }
