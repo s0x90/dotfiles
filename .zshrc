@@ -95,12 +95,12 @@ prompt_context() {
     #prompt_segment black default "%(!.%{%F{yellow}%}.)$USER"
   fi
 }
-export PATH="/Users/s0x90/go/bin/:$PATH"
+export PATH="$HOME/go/bin/:$PATH"
 
 # Created by `pipx` on 2023-04-25 11:45:49
-export PATH="$PATH:/Users/s0x90/.local/bin"
+export PATH="$PATH:$HOME/.local/bin"
 # The following lines have been added by Docker Desktop to enable Docker CLI completions.
-fpath=(/Users/s0x90/.docker/completions $fpath)
+fpath=($HOME/.docker/completions $fpath)
 autoload -Uz compinit
 compinit
 # End of Docker CLI completions
