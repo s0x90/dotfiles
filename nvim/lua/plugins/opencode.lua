@@ -28,50 +28,70 @@ return {
     },
   },
   config = function()
-    -- WezTerm pane management for opencode
+    -- WezTerm pane management for opencode (fully async — never blocks the UI)
     local opencode_wez = { pane_id = nil }
 
-    local function wezterm_pane_exists(pane_id)
+    --- Check if a WezTerm pane exists, then call `cb(exists)` on the main loop.
+    local function wezterm_pane_exists_async(pane_id, cb)
       if not pane_id then
-        return false
+        return cb(false)
       end
-      local result = vim.fn.system("wezterm cli list --format json 2>/dev/null")
-      local ok, panes = pcall(vim.json.decode, result)
-      if not ok or type(panes) ~= "table" then
-        return false
-      end
-      for _, pane in ipairs(panes) do
-        if tostring(pane.pane_id) == tostring(pane_id) then
-          return true
-        end
-      end
-      return false
+      vim.system({ "wezterm", "cli", "list", "--format", "json" }, { text = true }, function(out)
+        vim.schedule(function()
+          if out.code ~= 0 then
+            return cb(false)
+          end
+          local ok, panes = pcall(vim.json.decode, out.stdout)
+          if not ok or type(panes) ~= "table" then
+            return cb(false)
+          end
+          for _, pane in ipairs(panes) do
+            if tostring(pane.pane_id) == tostring(pane_id) then
+              return cb(true)
+            end
+          end
+          cb(false)
+        end)
+      end)
     end
 
+    --- Open an opencode split pane (skips the redundant pane-exists check).
     local function wezterm_start()
-      if wezterm_pane_exists(opencode_wez.pane_id) then
-        return
-      end
-      local result = vim.fn.system("wezterm cli split-pane --bottom --percent 35 -- opencode --port")
-      opencode_wez.pane_id = result:match("^%d+")
-      if vim.env.WEZTERM_PANE then
-        vim.fn.system("wezterm cli activate-pane --pane-id " .. vim.env.WEZTERM_PANE)
-      end
+      vim.system(
+        { "wezterm", "cli", "split-pane", "--bottom", "--percent", "35", "--", "opencode", "--port" },
+        { text = true },
+        function(out)
+          vim.schedule(function()
+            if out.code ~= 0 then
+              return
+            end
+            opencode_wez.pane_id = (out.stdout or ""):match("^%d+")
+            if vim.env.WEZTERM_PANE then
+              vim.system({ "wezterm", "cli", "activate-pane", "--pane-id", vim.env.WEZTERM_PANE })
+            end
+          end)
+        end
+      )
     end
 
+    --- Kill the opencode pane (skips the redundant pane-exists check).
     local function wezterm_stop()
-      if wezterm_pane_exists(opencode_wez.pane_id) then
-        vim.fn.system("wezterm cli kill-pane --pane-id " .. opencode_wez.pane_id)
-      end
+      local id = opencode_wez.pane_id
       opencode_wez.pane_id = nil
+      if id then
+        vim.system({ "wezterm", "cli", "kill-pane", "--pane-id", tostring(id) })
+      end
     end
 
+    --- Toggle: one async pane-exists check, then start or stop without re-checking.
     local function wezterm_toggle()
-      if wezterm_pane_exists(opencode_wez.pane_id) then
-        wezterm_stop()
-      else
-        wezterm_start()
-      end
+      wezterm_pane_exists_async(opencode_wez.pane_id, function(exists)
+        if exists then
+          wezterm_stop()
+        else
+          wezterm_start()
+        end
+      end)
     end
 
     ---@type opencode.Opts
