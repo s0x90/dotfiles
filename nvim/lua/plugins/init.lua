@@ -25,20 +25,6 @@ return {
     },
   },
   {
-    "nvim-telescope/telescope.nvim",
-    opts = function(_, conf)
-      conf.defaults.mappings.i = {
-        ["<C-n>"] = require("telescope.actions").move_selection_next,
-        ["<C-j>"] = require("telescope.actions").move_selection_previous,
-      }
-
-     -- or 
-     -- table.insert(conf.defaults.mappings.i, your table)
-      return conf
-    end,
-
-  },
-  {
   "nvim-tree/nvim-tree.lua",
   opts = {
     view = {
