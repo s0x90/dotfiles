@@ -76,7 +76,8 @@ plugins=(git)
 # else
 #   export EDITOR='mvim'
 # fi
-
+export EDITOR="nvim"
+export VISUAL="nvim"
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
