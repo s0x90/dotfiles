@@ -230,6 +230,17 @@ config.keys = {
 		key = "UpArrow",
 		action = wezterm.action.AdjustPaneSize({ "Up", 5 }),
 	},
+  {
+    mods = "SHIFT",
+    key = "PageUp",
+    action = wezterm.action.ScrollByPage(-1),
+  },
+  {
+    mods = "SHIFT",
+    key = "PageDown",
+    action = wezterm.action.ScrollByPage(1),
+  },
+
 }
 
 for i = 0, 9 do
@@ -341,6 +352,7 @@ wezterm.on("update-status", function(window, _)
 		{ Text = solid_left_arrow },
 	}))
 end)
+
 
 -- and finally, return the configuration to wezterm
 return config
