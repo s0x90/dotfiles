@@ -25,11 +25,11 @@ return {
     },
   },
   {
-  "nvim-tree/nvim-tree.lua",
-  opts = {
-    view = {
-      width = 30,
-    },
+    "nvim-tree/nvim-tree.lua",
+    opts = {
+      view = {
+        width = 30,
+      },
     on_attach = function(bufnr)
       local api = require "nvim-tree.api"
 
@@ -40,7 +40,7 @@ return {
         return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
       end
 
-      -- override <CR> with nil-guard to prevent E5108 on empty lines
+        -- override <CR> with nil-guard to prevent E5108 on empty lines
       vim.keymap.set("n", "<CR>", function()
         local node = api.tree.get_node_under_cursor()
         if node then
@@ -48,7 +48,7 @@ return {
         end
       end, opts("Open"))
 
-      -- same guard for double-click and 'o' which use the same function
+      -- guard for 'o' which uses the same open function
       vim.keymap.set("n", "o", function()
         local node = api.tree.get_node_under_cursor()
         if node then
