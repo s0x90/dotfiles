@@ -31,5 +31,5 @@ map("n", "<leader>fc", "<cmd>Telescope grep_string<cr>", { desc = "Find string u
 -- (only active in Go filetypes, with custom test runner for clear PASS/FAIL output)
 
 -- Duplicate line down/up 
-map('n', '<A-j>', ':t.<CR>==', { desc = 'Duplicate line down' })
-map('n', '<A-k>', ':t.-1<CR>==', { desc = 'Duplicate line up' })
+map('n', '<C-j>', ':t.<CR>==', { desc = 'Duplicate line down' })
+map('n', '<C-k>', ':t.-1<CR>==', { desc = 'Duplicate line up' })
