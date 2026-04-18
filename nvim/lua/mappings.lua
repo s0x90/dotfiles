@@ -19,7 +19,6 @@ map("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" }) -- c
 map("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" }) --  go to next tab
 map("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" }) --  go to previous tab
 map("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" }) --  move current buffer to new tab
-map("n", "<leader>bo", "<cmd>%bd|e#|bd#<cr>", { desc = "Close all buffers except current" }) -- close all of buffers except current one
 
 -- telescope map bindings
 map("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
@@ -30,16 +29,22 @@ map("n", "<leader>fc", "<cmd>Telescope grep_string<cr>", { desc = "Find string u
 -- Go keybindings are defined as buffer-local maps in lua/plugins/go.lua
 -- (only active in Go filetypes, with custom test runner for clear PASS/FAIL output)
 
--- Duplicate line down/up 
+-- Duplicate line down/up in Normal mode
 map('n', '<C-j>', ':t.<CR>==', { desc = 'Duplicate line down' })
 map('n', '<C-k>', ':t.-1<CR>==', { desc = 'Duplicate line up' })
 
--- close all buffers except current
-map("n", "<leader>ba", function()
-  local current_buf = vim.api.nvim_get_current_buf()
-  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-    if buf ~= current_buf and vim.api.nvim_buf_is_loaded(buf) then
-      vim.api.nvim_buf_delete(buf, { force = false })
-    end
-  end
-end, { desc = "Close all buffers except current" })
+-- Duplice line down/up in Insert Mode
+map('i', '<C-j>', ':t.<CR>==', { desc = 'Duplicate line down' })
+map('i', '<C-k>', ':t.-1<CR>==', { desc = 'Duplicate line up' })
+
+-- Move current line up/down in Normal mode
+map("n", "<A-j>", ":m .+1<CR>==")
+map("n", "<A-k>", ":m .-2<CR>==")
+
+-- Move current line up/down in Insert mode
+map("i", "<A-j>", "<Esc>:m .+1<CR>==gi")
+map("i", "<A-k>", "<Esc>:m .-2<CR>==gi")
+
+-- Close all buffers except current
+map("n", "<leader>ba", "<cmd>%bd|e#|bd#<cr>", { desc = "Close all buffers except current" }) -- close all of buffers except current one
+
