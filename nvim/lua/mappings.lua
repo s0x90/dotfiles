@@ -33,3 +33,13 @@ map("n", "<leader>fc", "<cmd>Telescope grep_string<cr>", { desc = "Find string u
 -- Duplicate line down/up 
 map('n', '<C-j>', ':t.<CR>==', { desc = 'Duplicate line down' })
 map('n', '<C-k>', ':t.-1<CR>==', { desc = 'Duplicate line up' })
+
+-- close all buffers except current
+map("n", "<leader>ba", function()
+  local current_buf = vim.api.nvim_get_current_buf()
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if buf ~= current_buf and vim.api.nvim_buf_is_loaded(buf) then
+      vim.api.nvim_buf_delete(buf, { force = false })
+    end
+  end
+end, { desc = "Close all buffers except current" })
