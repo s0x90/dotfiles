@@ -12,7 +12,7 @@ return {
         local src_buf = vim.api.nvim_get_current_buf()
         local src_lnum = vim.api.nvim_win_get_cursor(0)[1]
         local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
-        local text_width = wininfo.width - wininfo.textoff - vim.wo.sidescrolloff
+        local text_width = math.max(1, wininfo.width - wininfo.textoff - vim.wo.sidescrolloff)
 
         if vim.fn.strdisplaywidth(line) <= text_width then
           vim.notify("Line is not truncated", vim.log.levels.INFO)
@@ -55,15 +55,33 @@ return {
           },
         })
 
+        -- Block <CR> to enforce single-line editing
+        vim.keymap.set({ "n", "i" }, "<CR>", "<NOP>", { buffer = buf, silent = true })
+
         -- Write edited content back to the original buffer on close
         local original = line
         win:on("WinClosed", function()
+          if not vim.api.nvim_buf_is_valid(src_buf) or not vim.api.nvim_buf_is_loaded(src_buf) then
+            return
+          end
+
           local ok, lines = pcall(vim.api.nvim_buf_get_lines, buf, 0, -1, false)
           if not ok then return end
-          local new_line = table.concat(lines, "")
-          if new_line ~= original then
-            vim.api.nvim_buf_set_lines(src_buf, src_lnum - 1, src_lnum, false, { new_line })
+          local new_line = lines[1] or ""
+
+          if new_line == original then return end
+
+          local line_count = vim.api.nvim_buf_line_count(src_buf)
+          if src_lnum < 1 or src_lnum > line_count then return end
+
+          -- Verify source line hasn't changed while popup was open
+          local current = vim.api.nvim_buf_get_lines(src_buf, src_lnum - 1, src_lnum, false)[1]
+          if current ~= original then
+            vim.notify("Source line changed while popup was open, skipping write-back", vim.log.levels.WARN)
+            return
           end
+
+          pcall(vim.api.nvim_buf_set_lines, src_buf, src_lnum - 1, src_lnum, false, { new_line })
         end)
       end,
       desc = "Peek truncated line",
