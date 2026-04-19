@@ -45,12 +45,9 @@ map("n", "<A-k>", ":m .-2<CR>==")
 map("i", "<A-j>", "<Esc>:m .+1<CR>==gi")
 map("i", "<A-k>", "<Esc>:m .-2<CR>==gi")
 
--- Move selected lines down
+-- Move selected lines down/up
 map("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
-
--- Move selected lines up
 map("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
-
 
 -- Close all buffers except current
 map("n", "<leader>ba", "<cmd>%bd|e#|bd#<cr>", { desc = "Close all buffers except current" }) -- close all of buffers except current one
