@@ -80,6 +80,7 @@ Examine the code through each of these lenses. You MUST check ALL of them. Do no
 - CORS misconfigurations, missing CSRF protection
 - Sensitive data in logs
 - Timing attacks on secret comparison
+- Security vulnerabilities and potential exploits
 
 **6. Edge Cases & Input Validation**
 - Nil / null / undefined not handled
@@ -119,6 +120,8 @@ Examine the code through each of these lenses. You MUST check ALL of them. Do no
 - Breaking the principle of least surprise
 - Missing abstractions or wrong abstractions
 - API contracts that are impossible to evolve
+- Documentation and code clarity
+- Test coverage gaps
 
 ### Step 3: Format Each Issue
 
