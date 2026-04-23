@@ -12,8 +12,15 @@ The fix script removes conflicting /32 routes and forces the WireGuard subnet
 (e.g. 10.8.0.0/24) through the WireGuard utun interface.
 
 This cleanup script:
-1. Removes the forced subnet route via utunX
-2. Optionally restores connectivity behavior so Amnezia VPN can reapply its routing
+1. Removes the /24 subnet route that fix-wg-routes.sh installed via utunX
+
+Caveats:
+--------
+- This is NOT a full revert. fix-wg-routes.sh also deletes Amnezia's /32
+  routes; this script does not restore them. Those routes only come back
+  when Amnezia itself reapplies its config (reconnect, policy refresh, etc.).
+- macOS only (uses BSD route(8) syntax).
+- IPv4 only. IPv6 routes are not touched.
 
 Use this when:
 -------------
@@ -45,6 +52,18 @@ DOC
 
 set -euo pipefail
 
+# macOS-only guard.
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  echo "❌ macOS-only. This script uses BSD route(8) syntax."
+  exit 1
+fi
+
+# Must run as root.
+if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
+  echo "❌ This script must run as root (use sudo)."
+  exit 1
+fi
+
 WG_SUBNET_PREFIX="${WG_SUBNET_PREFIX:-10.8}"
 
 # Canonical full CIDR, used for route add/delete operations
@@ -61,7 +80,9 @@ WG_ROUTE_IFACE="$(netstat -rn -f inet | awk -v pfx="${WG_NETSTAT_CIDR}" '$1==pfx
 if [[ -n "${WG_ROUTE_IFACE:-}" ]]; then
   echo "⚠️  Found WG subnet route via ${WG_ROUTE_IFACE}"
   echo "🧹 Removing route ${WG_SUBNET_CIDR}..."
-  sudo route -n delete -net "${WG_SUBNET_CIDR}" >/dev/null || true
+  if ! sudo route -n delete -net "${WG_SUBNET_CIDR}" >/dev/null 2>&1; then
+    echo "   (note: route delete ${WG_SUBNET_CIDR} returned non-zero; continuing)"
+  fi
 else
   echo "ℹ️  No WireGuard subnet route found"
 fi
