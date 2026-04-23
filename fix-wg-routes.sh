@@ -52,14 +52,21 @@ set -euo pipefail
 # Prefix of WireGuard subnet (used to detect interface and filter routes)
 WG_SUBNET_PREFIX="${WG_SUBNET_PREFIX:-10.8}"
 
+# Canonical full CIDR, used for route add/delete operations
+WG_SUBNET_CIDR="${WG_SUBNET_PREFIX}.0/24"
+
+# BSD netstat collapses trailing zero octets in the Destination column
+# (e.g. "10.8.0.0/24" is shown as "10.8/24"). Use this form for awk matching.
+WG_NETSTAT_CIDR="${WG_SUBNET_PREFIX}/24"
+
 # Interface that should NOT handle WireGuard traffic (usually Wi-Fi)
 BAD_IFACE="${BAD_IFACE:-en0}"
 
 # Detect WireGuard interface (utunX) by looking for the /24 route
-WG_IFACE="$(netstat -rn -f inet | awk -v pfx="${WG_SUBNET_PREFIX}/24" '$1==pfx {print $4; exit}')"
+WG_IFACE="$(netstat -rn -f inet | awk -v pfx="${WG_NETSTAT_CIDR}" '$1==pfx {print $4; exit}')"
 
 if [[ -z "${WG_IFACE:-}" ]]; then
-  echo "❌ Could not detect WireGuard interface for ${WG_SUBNET_PREFIX}.0/24"
+  echo "❌ Could not detect WireGuard interface for ${WG_SUBNET_CIDR}"
   echo "Make sure WireGuard is connected."
   exit 1
 fi
@@ -86,8 +93,8 @@ echo
 echo "🔧 Reinstalling subnet route via ${WG_IFACE}..."
 
 # Ensure correct subnet route is installed via WireGuard
-sudo route -n delete -net "${WG_SUBNET_PREFIX}.0/24" >/dev/null 2>&1 || true
-sudo route -n add -net "${WG_SUBNET_PREFIX}.0/24" -interface "${WG_IFACE}"
+sudo route -n delete -net "${WG_SUBNET_CIDR}" >/dev/null 2>&1 || true
+sudo route -n add -net "${WG_SUBNET_CIDR}" -interface "${WG_IFACE}"
 
 echo
 echo "🧪 Verifying routing for ${WG_SUBNET_PREFIX}.0.1..."
