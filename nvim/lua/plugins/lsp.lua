@@ -86,6 +86,37 @@ return {
           require("lspconfig").gopls.setup {
             on_attach = function(client, bufnr)
               lsp.default_keymaps { buffer = bufnr }
+
+              -- Organize imports on save via gopls code action.
+              -- Faster than spawning `goimports` and uses gopls' in-memory module graph.
+              -- Formatting itself is done by conform.nvim (gofumpt) afterwards.
+              local group = vim.api.nvim_create_augroup("GoOrganizeImports", { clear = false })
+              vim.api.nvim_clear_autocmds { group = group, buffer = bufnr }
+              vim.api.nvim_create_autocmd("BufWritePre", {
+                group = group,
+                buffer = bufnr,
+                callback = function()
+                  local params = vim.lsp.util.make_range_params(0, client.offset_encoding or "utf-16")
+                  params.context = { only = { "source.organizeImports" }, diagnostics = {} }
+                  local result = vim.lsp.buf_request_sync(bufnr, "textDocument/codeAction", params, 1000)
+                  for _, res in pairs(result or {}) do
+                    for _, action in pairs(res.result or {}) do
+                      if action.edit then
+                        vim.lsp.util.apply_workspace_edit(action.edit, client.offset_encoding or "utf-16")
+                      end
+                      if action.command then
+                        -- Modern API (Nvim 0.11+); fall back to the deprecated
+                        -- function on older versions.
+                        if client.exec_cmd then
+                          client:exec_cmd(action.command)
+                        else
+                          vim.lsp.buf.execute_command(action.command)
+                        end
+                      end
+                    end
+                  end
+                end,
+              })
             end,
             settings = {
               gopls = {
