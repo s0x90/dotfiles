@@ -104,6 +104,15 @@ return {
                       if action.edit then
                         vim.lsp.util.apply_workspace_edit(action.edit, client.offset_encoding or "utf-16")
                       end
+                      if action.command then
+                        -- Modern API (Nvim 0.11+); fall back to the deprecated
+                        -- function on older versions.
+                        if client.exec_cmd then
+                          client:exec_cmd(action.command)
+                        else
+                          vim.lsp.buf.execute_command(action.command)
+                        end
+                      end
                     end
                   end
                 end,
