@@ -3,8 +3,9 @@ return {
   cmd = { "NvimTreeToggle", "NvimTreeFocus", "NvimTreeFindFile", "NvimTreeDebugIcons" },
   init = function()
     -- Register the debug command at startup so it is available even when
-    -- nvim-tree has not been loaded yet. Calling it triggers Lazy to load
-    -- the plugin (via cmd =), then reads the populated runtime config.
+    -- nvim-tree has not been loaded yet. Calling it manually asks Lazy to
+    -- load the plugin via require("lazy").load(...), then reads the
+    -- populated runtime config.
     vim.api.nvim_create_user_command("NvimTreeDebugIcons", function()
       pcall(function()
         require("lazy").load({ plugins = { "nvim-tree.lua" } })
