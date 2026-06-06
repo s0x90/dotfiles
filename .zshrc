@@ -120,3 +120,8 @@ setopt share_history
 setopt hist_expire_dups_first
 setopt hist_ignore_dups
 setopt hist_verify
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/s0x90/.lmstudio/bin"
+# End of LM Studio CLI section
+
