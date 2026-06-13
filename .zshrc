@@ -125,3 +125,11 @@ setopt hist_verify
 export PATH="$PATH:/Users/s0x90/.lmstudio/bin"
 # End of LM Studio CLI section
 
+
+# pnpm
+export PNPM_HOME="/Users/s0x90/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME/bin:"*) ;;
+  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
+esac
+# pnpm end
