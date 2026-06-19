@@ -113,7 +113,7 @@ return {
       require("opencode").select()
     end, { desc = "Execute opencode action…" })
     vim.keymap.set({ "n", "t" }, "<C-.>", function()
-      require("opencode").toggle()
+      wezterm_toggle()
     end, { desc = "Toggle opencode" })
 
     vim.keymap.set({ "n", "x" }, "go", function()
