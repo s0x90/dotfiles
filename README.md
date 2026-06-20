@@ -167,6 +167,7 @@ Skill definitions for AI coding agents (e.g., [OpenCode](https://opencode.ai/)):
 
 - **critic** -- Code review with focus on edge cases, race conditions, and security
 - **golangci-lint** -- Run golangci-lint after Go code changes
+- **go-ddd** -- Enforce Domain-Driven Design for Go services
 - **go-modern-guidelines** -- Apply modern Go syntax guidelines based on project Go version
 
 ## License
