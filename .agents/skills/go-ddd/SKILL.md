@@ -50,10 +50,18 @@ Enforce this specific folder convention for every domain component:
       conflict when 0 rows affected.
     - Document (e.g. MongoDB): `updateOne({_id, version}, {$set:{...}, $inc:{version:1}})`;
       conflict when `matchedCount == 0`.
+    - A no-op write means EITHER a version conflict OR the aggregate was deleted.
+      Disambiguate by re-reading by ID: found with a different version ->
+      `ErrConcurrencyConflict` (retry); not found -> `ErrNotFound` (do NOT retry).
+      Never assume 0 rows == conflict.
     - On `ErrConcurrencyConflict` the application service RETRIES the use case (reload
       aggregate, re-apply command, re-save) — bounded attempts (e.g. 3) with small
       backoff; surface the conflict only after retries are exhausted. Command handlers
       must be safe to re-run (no external side effects before commit).
+    - **Creation idempotency:** New aggregates start at version 1. Enforce a UNIQUE
+      constraint on aggregate ID / natural key (or an idempotency key) so concurrent
+      creates and client retries cannot duplicate. A duplicate-key error on insert ->
+      return the existing aggregate or a typed `ErrAlreadyExists`.
 - **Value Objects:**
   - Unexported fields + exported accessor methods (no setters). Immutability is
     enforced by encapsulation, not convention.
@@ -64,6 +72,19 @@ Enforce this specific folder convention for every domain component:
     domain<->a persistence DTO (a struct with exported fields, living in the adapter),
     or implement custom (Un)MarshalBSON/JSON. NEVER persist a domain aggregate directly;
     this also keeps the storage schema decoupled from the domain model.
+  - **Canonical shape** (apply the same pattern to aggregate roots — add `version` and
+    `PullEvents()` — and define ports as interfaces in `ports/`):
+
+    ```go
+    type Email struct{ value string }              // unexported field == immutable
+    func NewEmail(s string) (Email, error) {       // validate in constructor
+        if !isValidEmail(s) {
+            return Email{}, fmt.Errorf("%w: %q", ErrInvalidEmail, s)
+        }
+        return Email{value: s}, nil
+    }
+    func (e Email) String() string { return e.value } // accessor, never a setter
+    ```
 - **Domain Events:**
   - Aggregates RECORD events into an in-memory slice (e.g. `agg.PullEvents()`);
     they do NOT dispatch. Dispatch happens in the application layer AFTER the
@@ -74,6 +95,9 @@ Enforce this specific folder convention for every domain component:
   - Delivery is AT-LEAST-ONCE. Every event carries a stable unique ID and a
     correlation/trace ID; consumers MUST be idempotent (dedup by event ID, or use
     upserts). Never assume exactly-once delivery.
+  - Events carry an `OccurredAt` timestamp (UTC). Inject a `Clock` port (interface with
+    `Now()`) into domain services/aggregates rather than calling `time.Now()` directly —
+    keeps the domain deterministic and unit-testable.
 
 ### 4. Persistence & Transactions
 - An aggregate save MUST be atomic — one transaction covering the aggregate root,
@@ -104,3 +128,15 @@ Enforce this specific folder convention for every domain component:
 - Validate all external input at the value-object boundary; never build SQL by string
   concatenation in adapters — use parameterized queries.
 - Do not use global state, shared package singletons, or global `init()` blocks.
+
+### 6. Testing
+The ports exist to be tested against — close the loop.
+- **Domain / aggregates:** pure unit tests, NO mocks, NO I/O. Construct via constructors,
+  invoke mutations, assert invariants and every error branch.
+- **Application services:** test against in-memory FAKE implementations of ports (real
+  working fakes, not mocks), including the conflict/not-found/already-exists paths.
+- **Adapters:** integration/contract tests against the real backing store (e.g.
+  testcontainers), covering the optimistic-locking and uniqueness-constraint behavior.
+- Inject the `Clock` port in tests for deterministic time. Every invariant and every
+  typed domain error (`ErrConcurrencyConflict`, `ErrNotFound`, `ErrAlreadyExists`) gets
+  a test.
