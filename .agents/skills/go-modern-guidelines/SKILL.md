@@ -1,5 +1,5 @@
 ---
-name: use-modern-go
+name: go-modern-guidelines
 description: Apply modern Go syntax guidelines based on project's Go version. Use when user ask for modern Go code guidelines.
 ---
 
@@ -45,6 +45,21 @@ DO NOT search for go.mod files or try to detect the version yourself. Use ONLY t
 ### Go 1.18+
 
 - `any`: Use `any` instead of `interface{}`
+
+```go
+// Instead of: 
+type DBTX interface {
+	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
+	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
+	QueryRow(context.Context, string, ...interface{}) pgx.Row
+}
+// Use:
+type DBTX interface {
+	Exec(context.Context, string, ...any) (pgconn.CommandTag, error)
+	Query(context.Context, string, ...any) (pgx.Rows, error)
+	QueryRow(context.Context, string, ...any) pgx.Row
+}
+```
 - `bytes.Cut`: `before, after, found := bytes.Cut(b, sep)` instead of Index+slice
 - `strings.Cut`: `before, after, found := strings.Cut(s, sep)`
 
