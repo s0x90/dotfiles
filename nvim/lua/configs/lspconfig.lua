@@ -1,10 +1,10 @@
 require("nvchad.configs.lspconfig").defaults()
 
 -- Server settings live HERE, not in plugins/lsp.lua: this file runs at
--- User FilePost (before any vim.lsp.enable/attach), while plugins/lsp.lua
--- runs at VeryLazy — after a directly-opened file's server has already
--- started. vim.lsp.config() calls also take precedence over the lsp/*.lua
--- runtime files shipped by nvim-lspconfig.
+-- User FilePost, before plugins/lsp.lua (VeryLazy) calls vim.lsp.enable,
+-- so every config is registered before any server starts. vim.lsp.config()
+-- calls also take precedence over the lsp/*.lua runtime files shipped by
+-- nvim-lspconfig.
 
 -- Go: settings + organize-imports-on-save.
 vim.lsp.config("gopls", {
@@ -18,22 +18,33 @@ vim.lsp.config("gopls", {
       group = group,
       buffer = bufnr,
       callback = function()
-        local params = vim.lsp.util.make_range_params(0, client.offset_encoding or "utf-16")
-        params.context = { only = { "source.organizeImports" }, diagnostics = {} }
+        -- Build params from bufnr, not the current window: on :wa this
+        -- autocmd fires for buffers that aren't in the focused window, and
+        -- make_range_params(0, ...) would target the wrong file.
+        local params = {
+          textDocument = vim.lsp.util.make_text_document_params(bufnr),
+          range = { start = { line = 0, character = 0 }, ["end"] = { line = 0, character = 0 } },
+          context = { only = { "source.organizeImports" }, diagnostics = {} },
+        }
         local result = vim.lsp.buf_request_sync(bufnr, "textDocument/codeAction", params, 1000)
-        for _, res in pairs(result or {}) do
+        if not result then
+          -- notify_once: on a cold gopls cache every save times out for a
+          -- while; one warning is signal, one per save is noise.
+          vim.notify_once("gopls: organize imports timed out (cold cache?)", vim.log.levels.WARN)
+          return
+        end
+        for _, res in pairs(result) do
+          if res.err then
+            vim.notify("gopls organize imports: " .. res.err.message, vim.log.levels.WARN)
+          end
           for _, action in pairs(res.result or {}) do
+            -- Edits only: executing a command here would resolve async,
+            -- landing after the write (and after conform's format pass) and
+            -- leaving the just-saved buffer modified. gopls returns
+            -- organizeImports as an edit when the client supports
+            -- workspace edits, which Neovim does.
             if action.edit then
               vim.lsp.util.apply_workspace_edit(action.edit, client.offset_encoding or "utf-16")
-            end
-            if action.command then
-              -- Modern API (Nvim 0.11+); fall back to the deprecated
-              -- function on older versions.
-              if client.exec_cmd then
-                client:exec_cmd(action.command)
-              else
-                vim.lsp.buf.execute_command(action.command)
-              end
             end
           end
         end
@@ -79,9 +90,9 @@ vim.lsp.config("gopls", {
 })
 
 -- Python: basedpyright owns navigation/diagnostics; ruff (conform) owns
--- formatting + import sorting. Only the config is registered here — the
--- server is enabled by mason-lspconfig's automatic_enable (plugins/lsp.lua),
--- because its binary is on PATH only after mason.setup() runs.
+-- formatting + import sorting. Only the config is registered here — all
+-- servers are enabled in plugins/lsp.lua, because their binaries are on
+-- PATH only after mason.setup() runs.
 vim.lsp.config("basedpyright", {
   settings = {
     basedpyright = {
@@ -94,6 +105,3 @@ vim.lsp.config("basedpyright", {
     },
   },
 })
-
-local servers = { "html", "cssls", "gopls", "sqls" }
-vim.lsp.enable(servers)

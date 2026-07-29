@@ -17,31 +17,66 @@ return {
     { "saadparwaiz1/cmp_luasnip" },
   },
   config = function(_, opts)
-    -- LSP keymaps live in lua/autocmds.lua (plain LspAttach autocmd, loaded
-    -- at startup) so they cover servers that attach before this VeryLazy
-    -- plugin loads. Server settings live in configs/lspconfig.lua for the
-    -- same reason.
+    -- LSP keymaps live in lua/autocmds.lua (a plain LspAttach autocmd
+    -- registered at startup, independent of plugin load order). Server
+    -- settings live in configs/lspconfig.lua, which runs at User FilePost —
+    -- before the vim.lsp.enable() call below.
 
     require("mason").setup {}
-    require("mason-lspconfig").setup {
-      ensure_installed = {
-        "eslint",
-        "kotlin_lsp",
-        "lua_ls",
-        "jsonls",
-        "html",
-        "basedpyright",
-        "dockerls",
-        "bashls",
-        "marksman",
-        "gopls",
-      },
-      -- v2 auto-enables EVERY mason-installed server; keep stale python
-      -- servers and the ruff LSP (binary used only by conform) from attaching.
-      automatic_enable = {
-        exclude = { "pylsp", "pyright", "ruff" },
-      },
+
+    -- Single allowlist: mason installs exactly these and only these attach.
+    -- automatic_enable is off because it enables every mason-installed
+    -- server, so stray :MasonInstall experiments would keep attaching until
+    -- manually uninstalled.
+    local servers = {
+      "eslint",
+      "lua_ls",
+      "jsonls",
+      "html",
+      "cssls",
+      "basedpyright",
+      "dockerls",
+      "bashls",
+      "marksman",
+      "gopls",
+      "golangci_lint_ls",
+      "sqls",
+      "ts_ls",
     }
+    require("mason-lspconfig").setup {
+      ensure_installed = servers,
+      automatic_enable = false,
+    }
+    -- Must run after mason.setup() puts server binaries on PATH; attaches
+    -- to already-open buffers, so directly-opened files are covered too.
+    vim.lsp.enable(servers)
+
+    -- Non-LSP tools that conform.nvim (stylua, ruff) and nvim-dap (debugpy)
+    -- expect from mason — mason-lspconfig's ensure_installed covers servers
+    -- only. refresh() is async and fetches the registry index on a fresh
+    -- machine, where get_package would otherwise fail.
+    -- gofumpt is NOT here: it comes from `go install mvdan.cc/gofumpt@latest`.
+    local tools = { "stylua", "ruff", "debugpy" }
+    local mr = require "mason-registry"
+    mr.refresh(function()
+      for _, name in ipairs(tools) do
+        local ok, pkg = pcall(mr.get_package, name)
+        if ok and not pkg:is_installed() then
+          -- Surface failures with mason's own error: a missing tool otherwise
+          -- degrades silently (conform falls back to LSP formatting).
+          pkg:install(nil, function(success, err)
+            if not success then
+              vim.schedule(function()
+                vim.notify(
+                  ("mason: failed to install %s (%s) — formatting/debugging degraded"):format(name, err),
+                  vim.log.levels.WARN
+                )
+              end)
+            end
+          end)
+        end
+      end
+    end)
 
     local cmp = require "cmp"
     local luasnip = require "luasnip"
@@ -68,7 +103,11 @@ return {
         cmp.select_next_item(cmp_select)
       elseif luasnip.expand_or_jumpable() then
         luasnip.expand_or_jump()
-      elseif col == 0 or vim.fn.getline("."):sub(col, col):match "%s" then
+      -- %s$ on the text before the cursor: col is a byte index, so grabbing
+      -- a single byte with sub(col, col) lands mid-sequence on multibyte
+      -- text; whitespace is always single-byte, so anchoring at the end
+      -- stays correct.
+      elseif col == 0 or vim.fn.getline("."):sub(1, col):match "%s$" then
         fallback()
       else
         cmp.complete()

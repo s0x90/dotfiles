@@ -1,9 +1,8 @@
 require "nvchad.autocmds"
 
--- LSP navigation keymaps. A plain LspAttach autocmd registered at startup,
--- NOT inside a lazy-loaded plugin: VeryLazy fires too late for servers that
--- attach to a directly-opened file at User FilePost (gopls & co. via
--- configs/lspconfig.lua) — their LspAttach event would be missed.
+-- LSP navigation keymaps. A plain LspAttach autocmd registered at startup —
+-- independent of plugin load order, so it catches every server no matter
+-- when it attaches.
 vim.api.nvim_create_autocmd("LspAttach", {
   group = vim.api.nvim_create_augroup("UserLspKeymaps", {}),
   callback = function(ev)
