@@ -131,11 +131,11 @@ Then set the theme in your OpenCode config (`~/.config/opencode/config.json`):
 
 - **Framework**: [NvChad](https://nvchad.com/) v2.5
 - **Theme**: Material Darker
-- **LSP** (via mason): gopls, lua_ls, html, cssls, eslint, jsonls, pylsp, dockerls, bashls, kotlin_lsp, marksman
-- **Formatting**: StyLua (Lua), gofumpt (Go, via gopls)
-- **Debugging**: nvim-dap + nvim-dap-ui + nvim-dap-go (Delve) with virtual text
+- **LSP** (via mason): gopls, lua_ls, html, cssls, eslint, jsonls, basedpyright, dockerls, bashls, kotlin_lsp, marksman, sqls
+- **Formatting**: StyLua (Lua), gofumpt (Go, via gopls), ruff (Python)
+- **Debugging**: nvim-dap + nvim-dap-ui + nvim-dap-go (Delve) + nvim-dap-python (debugpy) with virtual text
 - **Go development**: go.nvim with custom test runner (colored PASS/FAIL output), struct tags, interface impl, coverage
-- **Completion**: lsp-zero + nvim-cmp with LuaSnip and friendly-snippets
+- **Completion**: nvim-cmp with LuaSnip and friendly-snippets
 - **Key plugins**: telescope.nvim, gitsigns, lazygit, auto-session, snacks.nvim, multicursor, diffmantic, codediff, opencode.nvim
 - **Custom mappings**: `<Space>` as leader, `jj` to exit insert mode, window/tab/search bindings
 
@@ -156,6 +156,16 @@ Then set the theme in your OpenCode config (`~/.config/opencode/config.json`):
 | `<F5>` | Debug test |
 | `<F9>` | Toggle breakpoint |
 | `<F10/F11/F12>` | Step over/into/out |
+
+#### Python keybindings (active in Python files)
+
+| Key | Action |
+|---|---|
+| `<F5>` | Debug: continue/launch |
+| `<F9>` | Toggle breakpoint |
+| `<F10/F11/F12>` | Step over/into/out |
+| `<leader>dpt` | Debug pytest method under cursor |
+| `<leader>dpc` | Debug pytest class under cursor |
 
 ### OpenCode (`opencode/`)
 

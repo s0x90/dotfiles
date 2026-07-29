@@ -5,6 +5,9 @@ local options = {
     -- gopls' `source.organizeImports` code action on save (see plugins/lsp.lua),
     -- which is much faster than spawning `goimports` (no module graph rescan).
     go = { "gofumpt" },
+    -- Python: ruff for import sorting and formatting (basedpyright's
+    -- organize-imports is disabled in plugins/lsp.lua). Binary: :MasonInstall ruff
+    python = { "ruff_organize_imports", "ruff_format" },
     -- css = { "prettier" },
     -- html = { "prettier" },
   },

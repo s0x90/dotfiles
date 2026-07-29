@@ -26,7 +26,7 @@ local function go_test_run(cmd_args)
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, { header, string.rep("─", #header + 4), "" })
 
   -- Highlight the header
-  local ns = vim.api.nvim_create_namespace("gotest")
+  local ns = vim.api.nvim_create_namespace "gotest"
   vim.api.nvim_buf_set_extmark(buf, ns, 0, 0, { end_row = 0, end_col = #header, hl_group = "GoTestRunning" })
 
   -- Make the buffer writable by us
@@ -36,17 +36,37 @@ local function go_test_run(cmd_args)
   local line_count = 3 -- after header + separator + blank line
 
   local function append_line(line)
-    if not vim.api.nvim_buf_is_valid(buf) then return end
+    if not vim.api.nvim_buf_is_valid(buf) then
+      return
+    end
     vim.bo[buf].modifiable = true
     vim.api.nvim_buf_set_lines(buf, line_count, line_count, false, { line })
 
     -- Apply per-line highlighting
-    if line:match("^%s*--- PASS") or line:match("^ok%s") then
-      vim.api.nvim_buf_set_extmark(buf, ns, line_count, 0, { end_row = line_count, end_col = #line, hl_group = "GoTestPassLine" })
-    elseif line:match("^%s*--- FAIL") or line:match("^FAIL%s") then
-      vim.api.nvim_buf_set_extmark(buf, ns, line_count, 0, { end_row = line_count, end_col = #line, hl_group = "GoTestFailLine" })
-    elseif line:match("^%s*--- SKIP") then
-      vim.api.nvim_buf_set_extmark(buf, ns, line_count, 0, { end_row = line_count, end_col = #line, hl_group = "GoTestSkipLine" })
+    if line:match "^%s*--- PASS" or line:match "^ok%s" then
+      vim.api.nvim_buf_set_extmark(
+        buf,
+        ns,
+        line_count,
+        0,
+        { end_row = line_count, end_col = #line, hl_group = "GoTestPassLine" }
+      )
+    elseif line:match "^%s*--- FAIL" or line:match "^FAIL%s" then
+      vim.api.nvim_buf_set_extmark(
+        buf,
+        ns,
+        line_count,
+        0,
+        { end_row = line_count, end_col = #line, hl_group = "GoTestFailLine" }
+      )
+    elseif line:match "^%s*--- SKIP" then
+      vim.api.nvim_buf_set_extmark(
+        buf,
+        ns,
+        line_count,
+        0,
+        { end_row = line_count, end_col = #line, hl_group = "GoTestSkipLine" }
+      )
     end
 
     line_count = line_count + 1
@@ -86,7 +106,9 @@ local function go_test_run(cmd_args)
     end,
     on_exit = function(_, exit_code)
       vim.schedule(function()
-        if not vim.api.nvim_buf_is_valid(buf) then return end
+        if not vim.api.nvim_buf_is_valid(buf) then
+          return
+        end
         vim.bo[buf].modifiable = true
 
         local separator = string.rep("═", 60)
@@ -105,24 +127,42 @@ local function go_test_run(cmd_args)
         -- Count test results from output
         local passed, failed, skipped = 0, 0, 0
         for _, line in ipairs(output_lines) do
-          if line:match("^%s*--- PASS") then passed = passed + 1 end
-          if line:match("^%s*--- FAIL") then failed = failed + 1 end
-          if line:match("^%s*--- SKIP") then skipped = skipped + 1 end
+          if line:match "^%s*--- PASS" then
+            passed = passed + 1
+          end
+          if line:match "^%s*--- FAIL" then
+            failed = failed + 1
+          end
+          if line:match "^%s*--- SKIP" then
+            skipped = skipped + 1
+          end
         end
 
         local summary = string.format("  Passed: %d  |  Failed: %d  |  Skipped: %d", passed, failed, skipped)
 
         -- Append final result block
-        append_line("")
+        append_line ""
         append_line(separator)
         local result_start = line_count
         append_line(result_line)
         local result_line_text = vim.api.nvim_buf_get_lines(buf, result_start, result_start + 1, false)[1] or ""
-        vim.api.nvim_buf_set_extmark(buf, ns, result_start, 0, { end_row = result_start, end_col = #result_line_text, hl_group = hl_group })
+        vim.api.nvim_buf_set_extmark(
+          buf,
+          ns,
+          result_start,
+          0,
+          { end_row = result_start, end_col = #result_line_text, hl_group = hl_group }
+        )
         local summary_start = line_count
         append_line(summary)
         local summary_line_text = vim.api.nvim_buf_get_lines(buf, summary_start, summary_start + 1, false)[1] or ""
-        vim.api.nvim_buf_set_extmark(buf, ns, summary_start, 0, { end_row = summary_start, end_col = #summary_line_text, hl_group = hl_group })
+        vim.api.nvim_buf_set_extmark(
+          buf,
+          ns,
+          summary_start,
+          0,
+          { end_row = summary_start, end_col = #summary_line_text, hl_group = hl_group }
+        )
         append_line(separator)
 
         -- Also update the header to reflect final state
@@ -132,7 +172,7 @@ local function go_test_run(cmd_args)
         vim.bo[buf].modifiable = false
 
         -- Show a notification
-        vim.notify(result_line:match("^%s*(.+)") .. "\n" .. summary:match("^%s*(.+)"), notify_level, {
+        vim.notify(result_line:match "^%s*(.+)" .. "\n" .. summary:match "^%s*(.+)", notify_level, {
           title = "Go Test",
         })
 
@@ -145,7 +185,7 @@ end
 
 -- Wrapper functions for different test scopes
 local function go_test()
-  go_test_run({ "go", "test", "-v", "-count=1", "./..." })
+  go_test_run { "go", "test", "-v", "-count=1", "./..." }
 end
 
 local function go_test_func()
@@ -170,40 +210,42 @@ local function go_test_func()
   if not func_name then
     -- Fallback: use regex to find function name
     local line = vim.api.nvim_get_current_line()
-    func_name = line:match("func%s+(Test%w+)")
+    func_name = line:match "func%s+(Test%w+)"
     if not func_name then
       -- Search upward for the nearest Test function
-      local cur_line = vim.fn.line(".")
+      local cur_line = vim.fn.line "."
       for i = cur_line, 1, -1 do
         local l = vim.fn.getline(i)
-        func_name = l:match("func%s+(Test%w+)")
-        if func_name then break end
+        func_name = l:match "func%s+(Test%w+)"
+        if func_name then
+          break
+        end
       end
     end
   end
 
-  if not func_name or not func_name:match("^Test") then
+  if not func_name or not func_name:match "^Test" then
     vim.notify("No test function found at or above cursor", vim.log.levels.WARN, { title = "Go Test" })
     return
   end
 
-  local pkg_dir = vim.fn.expand("%:p:h")
-  go_test_run({ "go", "test", "-v", "-count=1", "-run", "^" .. func_name .. "$", pkg_dir })
+  local pkg_dir = vim.fn.expand "%:p:h"
+  go_test_run { "go", "test", "-v", "-count=1", "-run", "^" .. func_name .. "$", pkg_dir }
 end
 
 local function go_test_pkg()
-  local pkg_dir = vim.fn.expand("%:p:h")
-  go_test_run({ "go", "test", "-v", "-count=1", pkg_dir })
+  local pkg_dir = vim.fn.expand "%:p:h"
+  go_test_run { "go", "test", "-v", "-count=1", pkg_dir }
 end
 
 local function go_test_file()
-  local file = vim.fn.expand("%:p")
-  local pkg_dir = vim.fn.expand("%:p:h")
+  local file = vim.fn.expand "%:p"
+  local pkg_dir = vim.fn.expand "%:p:h"
   -- Get all test function names in the current file
   local lines = vim.fn.readfile(file)
   local test_names = {}
   for _, line in ipairs(lines) do
-    local name = line:match("func%s+(Test%w+)")
+    local name = line:match "func%s+(Test%w+)"
     if name then
       table.insert(test_names, name)
     end
@@ -213,7 +255,7 @@ local function go_test_file()
     return
   end
   local pattern = "^(" .. table.concat(test_names, "|") .. ")$"
-  go_test_run({ "go", "test", "-v", "-count=1", "-run", pattern, pkg_dir })
+  go_test_run { "go", "test", "-v", "-count=1", "-run", pattern, pkg_dir }
 end
 
 return {
@@ -227,7 +269,7 @@ return {
   ft = { "go", "gomod", "gowork", "gotmpl" },
   build = ':lua require("go.install").update_all_sync()',
   config = function()
-    require("go").setup({
+    require("go").setup {
       -- Let lsp.lua handle gopls configuration via mason-lspconfig
       lsp_cfg = false,
       lsp_gofumpt = false, -- handled by gopls settings in lsp.lua
@@ -243,7 +285,7 @@ return {
       -- Formatting: handled by conform.nvim, so disable go.nvim's own format
       lsp_document_formatting = false,
 
-      -- Diagnostics: keep nvim default / lsp-zero handling
+      -- Diagnostics: keep nvim default handling
       diagnostic = false,
 
       -- Go tooling features
@@ -261,9 +303,9 @@ return {
       -- Icons (terminal-safe, no emoji)
       icons = { breakpoint = "●", currentpos = "→" },
 
-      -- Disable go.nvim luasnip loading (lsp-zero already loads friendly-snippets)
+      -- Disable go.nvim luasnip loading (the cmp spec already loads friendly-snippets)
       luasnip = false,
-    })
+    }
 
     -- Go-specific keymaps (scoped to Go filetypes)
     local map = vim.keymap.set
@@ -281,11 +323,21 @@ return {
         -- Go tool mappings (still use go.nvim commands)
         map("n", "<leader>ga", "<cmd>GoAddTag<cr>", vim.tbl_deep_extend("force", opts, { desc = "Go Add Tags" }))
         map("n", "<leader>gra", "<cmd>GoRmTag<cr>", vim.tbl_deep_extend("force", opts, { desc = "Go Remove Tags" }))
-        map("n", "<leader>gi", "<cmd>GoImpl<cr>", vim.tbl_deep_extend("force", opts, { desc = "Go Implement Interface" }))
+        map(
+          "n",
+          "<leader>gi",
+          "<cmd>GoImpl<cr>",
+          vim.tbl_deep_extend("force", opts, { desc = "Go Implement Interface" })
+        )
         map("n", "<leader>gf", "<cmd>GoFillStruct<cr>", vim.tbl_deep_extend("force", opts, { desc = "Go Fill Struct" }))
         map("n", "<leader>ge", "<cmd>GoIfErr<cr>", vim.tbl_deep_extend("force", opts, { desc = "Go If Err" }))
         map("n", "<leader>gc", "<cmd>GoCoverage<cr>", vim.tbl_deep_extend("force", opts, { desc = "Go Coverage" }))
-        map("n", "<leader>gl", "<cmd>GoCodeLenAct<cr>", vim.tbl_deep_extend("force", opts, { desc = "Go CodeLens Action" }))
+        map(
+          "n",
+          "<leader>gl",
+          "<cmd>GoCodeLenAct<cr>",
+          vim.tbl_deep_extend("force", opts, { desc = "Go CodeLens Action" })
+        )
         map("n", "<leader>gm", "<cmd>GoModTidy<cr>", vim.tbl_deep_extend("force", opts, { desc = "Go Mod Tidy" }))
       end,
     })
