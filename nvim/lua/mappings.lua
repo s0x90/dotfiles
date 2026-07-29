@@ -29,13 +29,15 @@ map("n", "<leader>fc", "<cmd>Telescope grep_string<cr>", { desc = "Find string u
 -- Go keybindings are defined as buffer-local maps in lua/plugins/go.lua
 -- (only active in Go filetypes, with custom test runner for clear PASS/FAIL output)
 
+-- Python DAP keybindings are buffer-local maps in lua/plugins/dap.lua (nvim-dap-python)
+
 -- Duplicate line down/up in Normal mode
-map('n', '<C-j>', ':t.<CR>==', { desc = 'Duplicate line down' })
-map('n', '<C-k>', ':t.-1<CR>==', { desc = 'Duplicate line up' })
+map("n", "<C-j>", ":t.<CR>==", { desc = "Duplicate line down" })
+map("n", "<C-k>", ":t.-1<CR>==", { desc = "Duplicate line up" })
 
 -- Duplice line down/up in Insert Mode
-map('i', '<C-j>', ':t.<CR>==', { desc = 'Duplicate line down' })
-map('i', '<C-k>', ':t.-1<CR>==', { desc = 'Duplicate line up' })
+map("i", "<C-j>", ":t.<CR>==", { desc = "Duplicate line down" })
+map("i", "<C-k>", ":t.-1<CR>==", { desc = "Duplicate line up" })
 
 -- Move current line up/down in Normal mode
 map("n", "<A-j>", ":m .+1<CR>==")
@@ -51,4 +53,3 @@ map("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
 
 -- Close all buffers except current
 map("n", "<leader>ba", "<cmd>%bd|e#|bd#<cr>", { desc = "Close all buffers except current" }) -- close all of buffers except current one
-
