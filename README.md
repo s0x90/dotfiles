@@ -131,8 +131,9 @@ Then set the theme in your OpenCode config (`~/.config/opencode/config.json`):
 
 - **Framework**: [NvChad](https://nvchad.com/) v2.5
 - **Theme**: Material Darker
-- **LSP** (via mason): gopls, lua_ls, html, cssls, eslint, jsonls, basedpyright, dockerls, bashls, kotlin_lsp, marksman, sqls
+- **LSP** (via mason): gopls, golangci_lint_ls, lua_ls, html, cssls, eslint, jsonls, basedpyright, dockerls, bashls, marksman, sqls, ts_ls
 - **Formatting**: StyLua (Lua), gofumpt (Go, via gopls), ruff (Python)
+- **Tools** (via mason, ensured at startup): stylua, ruff, debugpy. gofumpt is external: `go install mvdan.cc/gofumpt@latest` (expects `~/go/bin` on PATH)
 - **Debugging**: nvim-dap + nvim-dap-ui + nvim-dap-go (Delve) + nvim-dap-python (debugpy) with virtual text
 - **Go development**: go.nvim with custom test runner (colored PASS/FAIL output), struct tags, interface impl, coverage
 - **Completion**: nvim-cmp with LuaSnip and friendly-snippets
