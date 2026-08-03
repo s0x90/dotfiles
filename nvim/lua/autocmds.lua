@@ -45,6 +45,44 @@ vim.api.nvim_create_autocmd("LspAttach", {
   end,
 })
 
+-- `autoread` (set in options.lua) only reloads a buffer when something runs
+-- `:checktime` — it does not poll. Without this autocmd a buffer goes stale as
+-- soon as anything writes the file outside nvim (the Claude Code CLI shelling
+-- out to gofumpt, sed, git checkout…), and the next `:w` silently clobbers
+-- those changes with the stale contents.
+local checktime_failed = false
+
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "TermLeave" }, {
+  group = vim.api.nvim_create_augroup("UserCheckTime", {}),
+  callback = function()
+    -- `:checktime` cannot reload a buffer from inside an autocmd callback
+    -- (textlock), so it has to be deferred to the main loop — calling it
+    -- directly here silently does nothing. It also errors in command-line mode.
+    -- No buftype guard: `:checktime` is global and skips non-file buffers
+    -- itself, and gating on the current buffer would disable reloads exactly
+    -- while the cursor sits in the Claude terminal split.
+    vim.schedule(function()
+      if vim.fn.mode() == "c" then
+        return
+      end
+      -- pcall so a persistent failure can't spam a message on every CursorHold,
+      -- but report it once: this autocmd is the only thing keeping a stale
+      -- buffer from clobbering external edits on the next `:w`, so it must not
+      -- fail silently either. The latch tracks *currently* failing rather than
+      -- ever-failed, so a transient failure that recovers doesn't leave a stale
+      -- warning standing, and a later failure is still reported.
+      local ok, err = pcall(vim.cmd.checktime)
+      if ok then
+        checktime_failed = false
+      elseif not checktime_failed then
+        checktime_failed = true
+        vim.notify("checktime failed, buffers may go stale: " .. tostring(err), vim.log.levels.WARN)
+      end
+    end)
+  end,
+  desc = "Reload buffers changed on disk (Claude Code CLI, external formatters)",
+})
+
 -- Workaround for WezTerm < 20250518 DECSLRM bug (wezterm/wezterm#5750).
 -- Neovim 0.12+ detects DECSLRM support at runtime and uses scroll regions
 -- for vertical splits/floats, but WezTerm's implementation incorrectly
