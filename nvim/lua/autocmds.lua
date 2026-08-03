@@ -65,14 +65,18 @@ vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "TermLeav
       if vim.fn.mode() == "c" then
         return
       end
-      -- pcall so a persistent failure can't spam an error on every CursorHold,
-      -- but latch a single notification: this autocmd is the only thing keeping
-      -- a stale buffer from clobbering external edits on the next `:w`, so it
-      -- must not fail silently.
+      -- pcall so a persistent failure can't spam a message on every CursorHold,
+      -- but report it once: this autocmd is the only thing keeping a stale
+      -- buffer from clobbering external edits on the next `:w`, so it must not
+      -- fail silently either. The latch tracks *currently* failing rather than
+      -- ever-failed, so a transient failure that recovers doesn't leave a stale
+      -- warning standing, and a later failure is still reported.
       local ok, err = pcall(vim.cmd.checktime)
-      if not ok and not checktime_failed then
+      if ok then
+        checktime_failed = false
+      elseif not checktime_failed then
         checktime_failed = true
-        vim.notify("checktime failed; external file reloads are OFF: " .. tostring(err), vim.log.levels.ERROR)
+        vim.notify("checktime failed, buffers may go stale: " .. tostring(err), vim.log.levels.WARN)
       end
     end)
   end,
