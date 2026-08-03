@@ -11,7 +11,6 @@ Personal development environment configuration (dotfiles) for macOS. Includes sh
 | `.zshrc` | Zsh shell configuration with Powerlevel10k prompt |
 | `.wezterm.lua` | WezTerm terminal emulator configuration |
 | `nvim/` | Neovim configuration based on NvChad v2.5 |
-| `opencode/` | Custom theme for [OpenCode](https://opencode.ai/) TUI |
 | `.agents/` | AI coding agent skill definitions |
 
 ## Setup
@@ -68,43 +67,23 @@ nvim
 
 Wait for the initial plugin installation to complete, then restart Neovim.
 
-#### OpenCode
+#### Claude Code
 
-[OpenCode](https://opencode.ai/) is an open source AI coding agent for the terminal.
+[Claude Code](https://claude.com/claude-code) is Anthropic's AI coding agent for the terminal. The
+[claudecode.nvim](https://github.com/coder/claudecode.nvim) plugin runs it in a split inside Neovim
+and wires up selection sharing and in-editor diff review.
 
-Install via Homebrew:
-
-```sh
-brew install anomalyco/tap/opencode
-```
-
-Or via the install script:
+Install the CLI (this is the method used on this machine -- it installs to `~/.local/bin/claude`
+and self-updates, so keep `~/.local/bin` on your PATH):
 
 ```sh
-curl -fsSL https://opencode.ai/install | bash
+curl -fsSL https://claude.ai/install.sh | bash
 ```
 
-Or via npm:
+Then authenticate once:
 
 ```sh
-npm install -g opencode-ai
-```
-
-See the [OpenCode docs](https://opencode.ai/docs) for other installation methods and provider configuration.
-
-To apply the custom Material Darker theme from this repo:
-
-```sh
-mkdir -p ~/.config/opencode/themes
-ln -sf ~/dotfiles/opencode/themes/material-darker.json ~/.config/opencode/themes/material-darker.json
-```
-
-Then set the theme in your OpenCode config (`~/.config/opencode/config.json`):
-
-```json
-{
-  "theme": "material-darker"
-}
+claude
 ```
 
 ## Highlights
@@ -137,7 +116,7 @@ Then set the theme in your OpenCode config (`~/.config/opencode/config.json`):
 - **Debugging**: nvim-dap + nvim-dap-ui + nvim-dap-go (Delve) + nvim-dap-python (debugpy) with virtual text
 - **Go development**: go.nvim with custom test runner (colored PASS/FAIL output), struct tags, interface impl, coverage
 - **Completion**: nvim-cmp with LuaSnip and friendly-snippets
-- **Key plugins**: telescope.nvim, gitsigns, lazygit, auto-session, snacks.nvim, multicursor, diffmantic, codediff, opencode.nvim
+- **Key plugins**: telescope.nvim, gitsigns, lazygit, auto-session, snacks.nvim, multicursor, diffmantic, codediff, claudecode.nvim
 - **Custom mappings**: `<Space>` as leader, `jj` to exit insert mode, window/tab/search bindings
 
 #### Go keybindings (active in Go files)
@@ -168,13 +147,24 @@ Then set the theme in your OpenCode config (`~/.config/opencode/config.json`):
 | `<leader>dpt` | Debug pytest method under cursor |
 | `<leader>dpc` | Debug pytest class under cursor |
 
-### OpenCode (`opencode/`)
+#### Claude Code keybindings
 
-- Custom **Material Darker** color theme for the OpenCode terminal UI
+| Key | Action |
+|---|---|
+| `<leader>ac` | Toggle Claude split |
+| `<C-.>` | Toggle Claude split (needs a terminal that sends CSI-u) |
+| `<leader>af` | Focus Claude |
+| `<leader>ar` | Resume a previous session |
+| `<leader>aC` | Continue the last session |
+| `<leader>am` | Select model |
+| `<leader>ab` | Add current buffer to context |
+| `<leader>as` | Send visual selection (or add file from nvim-tree) |
+| `<leader>aa` / `<leader>ad` | Accept / deny proposed diff |
+| `<leader>aq` | Close all pending diffs |
 
 ### AI Agent Skills (`.agents/`)
 
-Skill definitions for AI coding agents (e.g., [OpenCode](https://opencode.ai/)):
+Skill definitions for AI coding agents (e.g., [Claude Code](https://claude.com/claude-code)):
 
 - **critic** -- Code review with focus on edge cases, race conditions, and security
 - **golangci-lint** -- Run golangci-lint after Go code changes
